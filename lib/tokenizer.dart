@@ -92,7 +92,7 @@ class TokenData {
 
 List<String> anonymousOperators = [
 	"+", "-", "\\cdot", "!", "^", "_",
-	"(", ")", "\\left|", "\\right|", "{", "}", "[", "]"
+	"(", ")", "\\left|", "\\right|", "\\left(", "\\right)", "{", "}", "[", "]"
 ];
 List<String> primitiveFuncNames = [
 	"\\frac", "\\sqrt", "\\log"

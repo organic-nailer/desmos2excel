@@ -200,6 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Text(
+                    errorStr,
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                  Text(
                       "↓",
                     style: Theme.of(context).textTheme.headline3,
                   ),
@@ -256,17 +262,22 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       onPressed: () {
+                        if(texStr.isEmpty) {
+                          return;
+                        }
                         try {
                           var tokenizer = Tokenizer(texStr);
                           var cellMap = Map<String,String>();
                           for (var value in variables) {
                             cellMap[value.symbol] = value.replaced;
                           }
+                          print("t=${tokenizer.tokenized.map((e) => e.kind)}");
                           var parsed = parser.parse(
                               tokenizer.tokenized,
                             cellMap
                           ) ?? "failed";
                           setState(() {
+                            errorStr = "";
                             outputStr = "=" + parsed;
                           });
                         } catch(e) {
