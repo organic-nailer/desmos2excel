@@ -1,6 +1,3 @@
-
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -35,9 +32,9 @@ class MyApp extends StatelessWidget {
       home: MyHomePage(),
       onGenerateRoute: (settings) {
         print("path: ${settings.name}");
-        var paths = settings.name.split('?');
-        if(paths.length != 2) return null;
-        var queryParameters = Uri.splitQueryString(paths[1]);
+        var paths = settings.name?.split('?');
+        if(paths?.length != 2) return null;
+        var queryParameters = Uri.splitQueryString(paths![1]);
         return MaterialPageRoute(
           settings: RouteSettings(name: settings.name),
           builder: (_) => new MyHomePage(params: queryParameters)
@@ -48,7 +45,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.params}) : super(key: key);
+  MyHomePage({Key? key, Map<String,String>? params})
+      : this.params = params ?? {}, super(key: key);
   final Map<String,String> params;
 
   @override
@@ -57,12 +55,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String dataStr = "initial";
-  Parser parser;
+  late Parser parser;
   String texStr = "";
   String outputStr = "=";
   String errorStr = "";
 
-  TextEditingController texController;
+  late TextEditingController texController;
   List<VariableData> variables = [];
   Map<String, VariableData> variablesMap = {};
 
@@ -78,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
         variables.clear();
         for(String c in tokenizer.getVariables()) {
           if(variablesMap.containsKey(c)) {
-            variables.add(variablesMap[c]);
+            variables.add(variablesMap[c]!);
           }
           else {
             var newVar = VariableData(c);
@@ -97,12 +95,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     print(widget.params);
-    widget.params?.entries?.where((e) => e.key != "formula")?.forEach((e) {
+    widget.params.entries.where((e) => e.key != "formula").forEach((e) {
       variablesMap[e.key] = VariableData(e.key, e.value);
     });
     print(variablesMap);
-    if(widget.params?.containsKey("formula") == true) {
-      texController.text = widget.params["formula"];
+    if(widget.params.containsKey("formula") == true) {
+      texController.text = widget.params["formula"]!;
       texStr = texController.text;
     }
   }
@@ -449,7 +447,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  String createShareLink(String formula, [List<VariableData> variables]) {
+  String createShareLink(String formula, [List<VariableData>? variables]) {
     var base = "https://desmos2excel.fastriver.dev/#/";
     var encodedFormula = Uri.encodeComponent(formula);
     if(variables == null || variables.isEmpty) {
@@ -467,10 +465,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class VariableData {
   final String symbol;
-  TextEditingController controller;
-  String replaced;
+  late TextEditingController controller;
+  String replaced = "";
 
-  VariableData(this.symbol, [String defaultStr]) {
+  VariableData(this.symbol, [String? defaultStr]) {
     if(defaultStr != null) {
       controller = TextEditingController(text: defaultStr);
       replaced = defaultStr;

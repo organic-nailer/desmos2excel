@@ -2,11 +2,13 @@ import 'dart:convert';
 
 class CharReader {
 
+// ignore: non_constant_identifier_names
 	static final String EOF = AsciiDecoder().convert([26]);
+// ignore: non_constant_identifier_names
 	static final String LINE_TERMINATOR = "\n";
 
 	final String inputStr;
-	List<String> inputStrings;
+	late List<String> inputStrings;
 	int inputIndex = 0;
 	String line = "";
 	int lineLength = 0;
@@ -23,7 +25,7 @@ class CharReader {
 		if(++index == lineLength && inputStrings.length != inputIndex) {
 			return LINE_TERMINATOR;
 		}
-		return readNextLine() ?? EOF;
+		return readNextLine();
 	}
 
 	String readNextLine() {
@@ -41,7 +43,7 @@ class CharReader {
 	}
 
 	var numberPattern = RegExp(r"^((0|[1-9][0-9]*)\.[0-9]*|\.[0-9]*|(0|([1-9][0-9]*)))");
-	String readNumber() {
+	String? readNumber() {
 		var subStr = line.substring(index);
 		var match = numberPattern.firstMatch(subStr);
 		if(match == null) return null;
@@ -51,7 +53,7 @@ class CharReader {
 	}
 
 	var identifierPattern = RegExp(r"^\\[A-Za-z\$\_][A-Za-z\$\_]*");
-	String readFuncName() {
+	String? readFuncName() {
 		var subStr = line.substring(index);
 		var match = identifierPattern.firstMatch(subStr);
 		if(match == null) return null;
@@ -61,7 +63,7 @@ class CharReader {
 	}
 
 	var charPattern = RegExp(r"^[A-Za-z]");
-	String readChar() {
+	String? readChar() {
 		var subStr = line.substring(index);
 		var match = charPattern.firstMatch(subStr);
 		if(match == null) return null;

@@ -48,13 +48,13 @@ class Parser {
 		// });
 	}
 
-	String parse(List<TokenData> input, Map<String, String> cellMap) {
+	String? parse(List<TokenData> input, Map<String, String> cellMap) {
 		var parsed = parseInternal(input);
 		if(parsed == null) return null;
 		return parsed.toExcel(cellMap);
 	}
 
-	NodeInternal parseInternal(List<TokenData> input) {
+	NodeInternal? parseInternal(List<TokenData> input) {
 		var stack = Queue<StackData>();
 		var nodeStack = Queue<NodeInternal>();
 		var parseIndex = 0;
@@ -65,7 +65,7 @@ class Parser {
 			var transition = transitionMap[stack.first.state + input[parseIndex].kind];
 			switch(transition?.kind) {
 				case TransitionKind.SHIFT: {
-					stack.addFirst(StackData(transition.value, input[parseIndex].kind));
+					stack.addFirst(StackData(transition!.value!, input[parseIndex].kind));
 					nodeStack.addFirst(NodeInternal(
 						stack.first.token,
 						input[parseIndex].raw,
@@ -75,16 +75,16 @@ class Parser {
 				}
 				case TransitionKind.REDUCE: {
 					var newNode = NodeInternal(
-						transition.ruleLeft, null
+						transition!.ruleLeft!, null
 					);
 					var startStack = nodeStack.first;
-					for(int i = 0; i < transition.ruleRight; i++) {
+					for(int i = 0; i < transition.ruleRight!; i++) {
 						stack.removeFirst();
 						startStack = nodeStack.removeFirst();
 						newNode.children.add(startStack);
 					}
-					var newState = transitionMap[stack.first.state + transition.ruleLeft]?.value;
-					stack.addFirst(StackData(newState, transition.ruleLeft));
+					var newState = transitionMap[stack.first.state + transition.ruleLeft!]!.value!;
+					stack.addFirst(StackData(newState, transition.ruleLeft!));
 					nodeStack.addFirst(newNode);
 					break;
 				}
@@ -113,9 +113,9 @@ class StackData {
 
 class TransitionData {
 	final TransitionKind kind;
-	final String value;
-	final String ruleLeft;
-	final int ruleRight;
+	final String? value;
+	final String? ruleLeft;
+	final int? ruleRight;
 	TransitionData(
 		this.kind, {this.value,
 		this.ruleLeft, this.ruleRight});
@@ -126,7 +126,7 @@ enum TransitionKind {
 
 class NodeInternal {
 	final String kind;
-	final String value;
+	final String? value;
 	List<NodeInternal> children = [];
 	NodeInternal(this.kind, this.value);
 
@@ -140,7 +140,7 @@ class NodeInternal {
 				if(children.length == 1) {
 					return children[0].toExcel(cellMap);
 				}
-				var op = children[1].value == "\\cdot" ? "*" : children[1].value;
+				var op = children[1].value == "\\cdot" ? "*" : children[1].value!;
 				return children[2].toExcel(cellMap) + op + children[0].toExcel(cellMap);
 			}
 			case "UnaryExpression": {
@@ -150,7 +150,7 @@ class NodeInternal {
 				if(children[1].value == "!") {
 					return "FACT(${children[0].toExcel(cellMap)})";
 				}
-				return children[1].value + children[0].toExcel(cellMap);
+				return children[1].value! + children[0].toExcel(cellMap);
 			}
 			case "IndexExpression": {
 				if(children.length == 1) {
@@ -183,13 +183,13 @@ class NodeInternal {
 				return "(${children[1].toExcel(cellMap)})";
 			}
 			case "NumberLiteral": {
-				return value;
+				return value!;
 			}
 			case "CharacterLiteral": {
 				if(cellMap[value]?.isEmpty == true) {
-					return value;
+					return value!;
 				}
-				return cellMap[value];
+				return cellMap[value]!;
 			}
 			case "FunctionExpression": {
 				if(children.length == 1) {

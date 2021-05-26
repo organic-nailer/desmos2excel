@@ -1,9 +1,9 @@
 import 'package:tex_to_excel/char_reader.dart';
 
 class Tokenizer {
-	List<TokenData> tokenized;
+	List<TokenData> tokenized = [];
 	final String input;
-	CharReader reader;
+	late CharReader reader;
 	int readIndex = 0;
 	var operators = <String>[];
 	Tokenizer(this.input) {
@@ -57,10 +57,10 @@ class Tokenizer {
 				if(name == "\\frac"
 				  || name == "\\sqrt"
 				  || name == "\\log") {
-					res.add(TokenData(name, name));
+					res.add(TokenData(name!, name));
 				}
 				else if(name == "\\pi") {
-					res.add(TokenData(name, "F0Name"));
+					res.add(TokenData(name!, "F0Name"));
 				}
 				else if(name != null) {
 					res.add(TokenData(name, "F1Name"));
