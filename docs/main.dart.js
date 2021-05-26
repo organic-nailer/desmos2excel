@@ -15021,7 +15021,7 @@ C.Ke.i_(0,s,t.a).aa(0,new L.abh(P.bi(s)))
 $.ajg=!0}},
 abh:function abh(a){this.a=a},
 Va:function Va(){},
-ai_:function(a){var s=H.a([],t.i),r=new L.a2B(a,s),q=new Y.Rd(a,P.iP("^((0|[1-9][0-9]*)\\.[0-9]*|\\.[0-9]*|(0|([1-9][0-9]*)))((e|E)[\\+-]?[0-9]+)?",!0),P.iP("^\\\\[A-Za-z\\$\\_][A-Za-z0-9\\$\\_]*",!0),P.iP("^[A-Za-z]",!0))
+ai_:function(a){var s=H.a([],t.i),r=new L.a2B(a,s),q=new Y.Rd(a,P.iP("^((0|[1-9][0-9]*)\\.[0-9]*|\\.[0-9]*|(0|([1-9][0-9]*)))",!0),P.iP("^\\\\[A-Za-z\\$\\_][A-Za-z\\$\\_]*",!0),P.iP("^[A-Za-z]",!0))
 q.b=H.a(a.split("\n"),t.s)
 r.c=q
 C.b.X(s,$.ajT)

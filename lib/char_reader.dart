@@ -40,7 +40,7 @@ class CharReader {
 		return line.startsWith(value, index);
 	}
 
-	var numberPattern = RegExp(r"^((0|[1-9][0-9]*)\.[0-9]*|\.[0-9]*|(0|([1-9][0-9]*)))((e|E)[\+-]?[0-9]+)?");
+	var numberPattern = RegExp(r"^((0|[1-9][0-9]*)\.[0-9]*|\.[0-9]*|(0|([1-9][0-9]*)))");
 	String readNumber() {
 		var subStr = line.substring(index);
 		var match = numberPattern.firstMatch(subStr);
@@ -50,7 +50,7 @@ class CharReader {
 		return matchStr;
 	}
 
-	var identifierPattern = RegExp(r"^\\[A-Za-z\$\_][A-Za-z0-9\$\_]*");
+	var identifierPattern = RegExp(r"^\\[A-Za-z\$\_][A-Za-z\$\_]*");
 	String readFuncName() {
 		var subStr = line.substring(index);
 		var match = identifierPattern.firstMatch(subStr);
