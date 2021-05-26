@@ -1,4 +1,6 @@
 
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -27,26 +29,27 @@ class MyApp extends StatelessWidget {
         Locale("ja", "JP"),
       ],
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         fontFamily: "Noto Sans JP",
         primarySwatch: Colors.green,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
+      onGenerateRoute: (settings) {
+        print("path: ${settings.name}");
+        var paths = settings.name.split('?');
+        if(paths.length != 2) return null;
+        var queryParameters = Uri.splitQueryString(paths[1]);
+        return MaterialPageRoute(
+          settings: RouteSettings(name: settings.name),
+          builder: (_) => new MyHomePage(params: queryParameters)
+        );
+      },
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage({Key key, this.params}) : super(key: key);
+  final Map<String,String> params;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -88,6 +91,20 @@ class _MyHomePageState extends State<MyHomePage> {
         print("内部エラー: $e");
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print(widget.params);
+    widget.params?.entries?.where((e) => e.key != "formula")?.forEach((e) {
+      variablesMap[e.key] = VariableData(e.key, e.value);
+    });
+    print(variablesMap);
+    if(widget.params?.containsKey("formula") == true) {
+      texController.text = widget.params["formula"];
+      texStr = texController.text;
+    }
   }
 
   @override
@@ -288,6 +305,65 @@ class _MyHomePageState extends State<MyHomePage> {
                       },
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton.icon(
+                      label: Text("数式を共有..."),
+                      icon: Icon(Icons.share),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("共有"),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    title: Text("関数のみ"),
+                                    subtitle: SelectableText(createShareLink(texStr)),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.copy),
+                                        onPressed: () async {
+                                          final data = ClipboardData(
+                                              text: createShareLink(texStr)
+                                          );
+                                          await Clipboard.setData(data);
+                                          final snackBar = SnackBar(content: Text('コピーしました'));
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                        }
+                                    ),
+                                  ),
+                                  ListTile(
+                                    title: Text("全て"),
+                                    subtitle: SelectableText(createShareLink(texStr, variables)),
+                                    trailing: IconButton(
+                                        icon: Icon(Icons.copy),
+                                        onPressed: () async {
+                                          final data = ClipboardData(
+                                              text: createShareLink(texStr, variables)
+                                          );
+                                          await Clipboard.setData(data);
+                                          final snackBar = SnackBar(content: Text('コピーしました'));
+                                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                        }
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("閉じる")
+                              )
+                            ],
+                          )
+                        );
+                      },
+                    ),
+                  ),
                   //下のテーブル
                   Table(
                     border: TableBorder.all(
@@ -372,6 +448,21 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  String createShareLink(String formula, [List<VariableData> variables]) {
+    var base = "https://desmos2excel.fastriver.dev/#/";
+    var encodedFormula = Uri.encodeComponent(formula);
+    if(variables == null || variables.isEmpty) {
+      return base + "?formula=$encodedFormula";
+    }
+    var variableStr = "";
+    variables.forEach((e) {
+      if(e.replaced.isNotEmpty) {
+        variableStr += "&${e.symbol}=${Uri.encodeComponent(e.replaced)}";
+      }
+    });
+    return base + "?formula=$encodedFormula" + variableStr;
+  }
 }
 
 class VariableData {
@@ -379,9 +470,15 @@ class VariableData {
   TextEditingController controller;
   String replaced;
 
-  VariableData(this.symbol) {
-    controller = TextEditingController();
-    replaced = "";
+  VariableData(this.symbol, [String defaultStr]) {
+    if(defaultStr != null) {
+      controller = TextEditingController(text: defaultStr);
+      replaced = defaultStr;
+    }
+    else {
+      controller = TextEditingController();
+      replaced = "";
+    }
   }
 
   void dispose() {
